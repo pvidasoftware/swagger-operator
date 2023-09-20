@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger
+  labels:
+    app: swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: swagger
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: swagger
+    spec:
+      containers:
+        - name: swagger
+          image: swaggerapi/swagger-ui
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+              name: http
+          resources:
+            limits:
+              memory: 256M
+            requests:
+              cpu: "200m"
+              memory: 256M
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/swagger-initializer.js
+              name: swagger-config
+              subPath: swagger-initializer.js
+            - mountPath: /docker-entrypoint.d/40-swagger-ui.sh
+              name: swagger-config
+              subPath: 40-swagger-ui.sh
+      volumes:
+        - name: swagger-config
+          configMap:
+            name: swagger-config
+            items:
+              - key: 40-swagger-ui.sh
+                path: 40-swagger-ui.sh
+              - key: swagger-initializer.js
+                path: swagger-initializer.js

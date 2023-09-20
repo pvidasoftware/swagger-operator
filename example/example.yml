@@ -1,0 +1,9 @@
+apiVersion: puravida.com/v1
+kind: Swagger
+metadata:
+  name: swagger-operator
+spec:
+  serviceSelector: swagger-path
+  configMap: swagger-config
+  deployment: swagger
+  service: swagger

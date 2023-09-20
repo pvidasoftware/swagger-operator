@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: swaggerOperator
+  config-client:
+    enabled: true

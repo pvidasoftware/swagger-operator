@@ -1,0 +1,78 @@
+plugins {
+    id("groovy") 
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.micronaut.application") version "3.7.8"
+    id("com.google.cloud.tools.jib") version "2.8.0"
+}
+
+version = "0.1"
+group = "com.puravida"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-management")
+    implementation("io.micronaut.groovy:micronaut-runtime-groovy")
+    implementation("io.micronaut.kubernetes:micronaut-kubernetes-discovery-client")
+    implementation("io.micronaut.kubernetes:micronaut-kubernetes-informer")
+    implementation("io.micronaut.kubernetes:micronaut-kubernetes-operator")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    compileOnly("io.micronaut:micronaut-http-validation")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+
+}
+
+
+application {
+    mainClass.set("com.puravida.Application")
+}
+java {
+    sourceCompatibility = JavaVersion.toVersion("17")
+    targetCompatibility = JavaVersion.toVersion("17")
+}
+
+compileGroovy.groovyOptions.configurationScript = file('gradle/config/groovyc.groovy')
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("spock2")
+    processing {
+        incremental(true)
+        annotations("com.puravida.*")
+        annotations("com.puravida.*")
+    }
+}
+
+tasks.named("dockerBuild") {
+    images = ["registry.localhost:5000/swagger-operator"]
+}
+
+tasks {
+    jib {
+        allowInsecureRegistries = true
+        from{
+            image = 'openjdk:17-alpine'
+        }
+        to {
+            image = "registry.localhost:5000/swagger-operator"
+        }
+    }
+}
+
+//
+// Build model
+/*
+  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(pwd)":"$(pwd)" \
+      -ti --network host ghcr.io/kubernetes-client/java/crd-model-gen:v1.0.6  \
+      /generate.sh -u $(pwd)/src/k8s/crd.yml -n com.puravida -p com.puravida \
+      -o $(pwd)
+
+  sudo chown -R $(whoami):$(whoami) src/main/java/*
+ */
+

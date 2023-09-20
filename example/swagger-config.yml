@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swagger-config
+data:
+  40-swagger-ui.sh: |
+    #! /bin/sh
+    set -e
+    echo do nothing
+  swagger-initializer.js: |
+    window.onload = function() {
+        window.ui = SwaggerUIBundle({
+            urls: [
+                {
+                    name:"Service 1",
+                    url:"/service1/swagger/service-example-0.0.yml"
+                }
+                
+            ],
+            "dom_id": "#swagger-ui",
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+            queryConfigEnabled: false,
+            requestInterceptor: (e)=>{
+                console.log(e)
+                if( !e.loadSpec ){
+                    const service = document.getElementById("select").value;
+
+                    const split = service.split("/");
+                    const servicename = split[1];
+
+                    const current = e.url.split("/");
+                    const protocol = current.shift();
+                    const empty1 = current.shift();
+                    const domain = current.shift();
+                    
+                    e.url = `${protocol}//${domain}/${servicename}/${current.join('/')}`
+                }
+                return e;
+            }
+        })
+    };
+---

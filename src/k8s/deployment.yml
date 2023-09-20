@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: swagger-deployment-operator
+  name: swagger-deployment-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-deployment-operator
+  template:
+    metadata:
+      labels:
+        app: swagger-deployment-operator
+    spec:
+      serviceAccountName: swagger-operator-sa
+      containers:
+        - image: registry.localhost:5000/swagger-operator
+          name: swagger-deployment-operator
+          imagePullPolicy: Always
